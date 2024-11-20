@@ -12,6 +12,7 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@server/*": ["./apps/server/src/*"],
+      "@prisma/*": ["./apps/server/prisma/*"],
       "@web/*": ["./apps/web/*"]
     }
   }
