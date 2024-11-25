@@ -48,11 +48,13 @@ export class PrismaService
       process.env.NODE_ENV === 'development' ||
       process.env.NODE_ENV === 'test'
     ) {
-      const models = Reflect.ownKeys(this).filter((key) => key[0] !== '_');
+      const models = Reflect.ownKeys(this).filter(
+        (key) => typeof key === 'symbol' || key[0] !== '_',
+      );
 
       return Promise.all(
         models.map((modelKey) => {
-          return this[modelKey as string].deleteMany();
+          return (this[modelKey as keyof this] as any).deleteMany();
         }),
       );
     }

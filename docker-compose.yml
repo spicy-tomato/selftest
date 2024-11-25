@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  server:
+    image: selftest/server
+    build:
+      context: .
+      dockerfile: ./apps/server/Dockerfile
+      target: deploy
+    ports:
+      - 3000:3000
