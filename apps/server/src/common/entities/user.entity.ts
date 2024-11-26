@@ -6,8 +6,8 @@ export class UserEntity implements Prisma.UserUncheckedCreateInput {
   name?: string | null;
   image?: string | null;
   emailVerified?: Date | null;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 
   constructor(partial: Partial<UserEntity>) {
     Object.assign(this, partial);

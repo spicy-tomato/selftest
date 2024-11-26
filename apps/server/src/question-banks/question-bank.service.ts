@@ -13,11 +13,15 @@ export class QuestionBankService {
         userId,
         title: dto.title,
         description: dto.description,
+        createdAt: dto.createdAt,
+        updatedAt: dto.createdAt,
         questions: {
           create: dto.questions.map((q) => ({
             questionText: q.questionText,
             explanation: q.explanation,
             type: q.type,
+            createdAt: dto.createdAt,
+            updatedAt: dto.createdAt,
             answers: {
               create: q.answers.map((a) => ({
                 answerText: a.answerText,

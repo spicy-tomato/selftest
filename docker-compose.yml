@@ -1,8 +1,7 @@
-version: '3.9'
-
 services:
   server:
-    image: selftest/server
+    image: selftest/server:0.0.6
+    container_name: server
     build:
       context: .
       dockerfile: ./apps/server/Dockerfile
@@ -11,8 +10,8 @@ services:
       - 3000:3000
 
   db:
-    container_name: selftest_db
     image: postgres:17.2-alpine3.20
+    container_name: db
     restart: always
     shm_size: 128mb
     ports:

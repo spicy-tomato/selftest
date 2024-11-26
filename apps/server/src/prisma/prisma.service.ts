@@ -22,7 +22,7 @@ export class PrismaService
       console.log('Successfully connected to database');
 
       // Add Prisma middleware for logging (optional)
-      this.$use(async (params, next) => {
+      this.$use(async (params: any, next: any) => {
         const before = Date.now();
         const result = await next(params);
         const after = Date.now();

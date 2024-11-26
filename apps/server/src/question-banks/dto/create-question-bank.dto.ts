@@ -7,6 +7,7 @@ import {
   ArrayMinSize,
   IsEnum,
   IsBoolean,
+  IsDateString,
 } from 'class-validator';
 import { QuestionType } from '@prisma/client';
 
@@ -53,4 +54,7 @@ export class CreateQuestionBankDto {
   @Type(() => CreateQuestionDto)
   @ArrayMinSize(1)
   questions: CreateQuestionDto[];
+
+  @IsDateString()
+  createdAt: string;
 }
