@@ -7,7 +7,7 @@ import { UpdateQuestionBankDto } from './dto/update-question-bank.dto';
 export class QuestionBankService {
   constructor(private prisma: PrismaService) {}
 
-  async createQuestionBank(userId: string, dto: CreateQuestionBankDto) {
+  async create(userId: string, dto: CreateQuestionBankDto) {
     return this.prisma.questionBank.create({
       data: {
         userId,
@@ -38,7 +38,7 @@ export class QuestionBankService {
     });
   }
 
-  async getUserQuestionBanks(userId: string) {
+  async getListByUserId(userId: string) {
     return this.prisma.questionBank.findMany({
       where: { userId },
       include: {
@@ -51,7 +51,7 @@ export class QuestionBankService {
     });
   }
 
-  async getQuestionBankById(bankId: string, userId: string) {
+  async getById(bankId: string, userId: string) {
     const bank = await this.prisma.questionBank.findFirst({
       where: {
         id: bankId,
@@ -73,11 +73,7 @@ export class QuestionBankService {
     return bank;
   }
 
-  async updateQuestionBank(
-    bankId: string,
-    userId: string,
-    dto: UpdateQuestionBankDto,
-  ) {
+  async update(bankId: string, userId: string, dto: UpdateQuestionBankDto) {
     // Implement update logic with comprehensive validation
     return this.prisma.questionBank.update({
       where: {
@@ -92,7 +88,7 @@ export class QuestionBankService {
     });
   }
 
-  async deleteQuestionBank(bankId: string, userId: string) {
+  async delete(bankId: string, userId: string) {
     return this.prisma.questionBank.deleteMany({
       where: {
         id: bankId,

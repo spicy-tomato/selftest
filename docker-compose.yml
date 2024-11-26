@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 
 services:
   server:
@@ -9,3 +9,13 @@ services:
       target: deploy
     ports:
       - 3000:3000
+
+  db:
+    container_name: selftest_db
+    image: postgres:17.2-alpine3.20
+    restart: always
+    shm_size: 128mb
+    ports:
+      - "54320:5432"
+    environment:
+      POSTGRES_PASSWORD: example
