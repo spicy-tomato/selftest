@@ -1,4 +1,4 @@
-name: Publish server image
+name: Server CI
 
 on:
   workflow_dispatch:
