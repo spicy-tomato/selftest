@@ -1,4 +1,4 @@
-name: Publish Docker Image
+name: Publish server image
 
 on:
   workflow_dispatch:
@@ -35,9 +35,9 @@ jobs:
     # Build the Docker image
     - name: Build Docker image
       run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/selftest:server-${{ github.event.inputs.version }} -f apps/server/Dockerfile .
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/selftest-server:${{ github.event.inputs.version }} -f apps/server/Dockerfile .
 
     # Push the Docker image to Docker Hub
     - name: Push Docker image
       run: |
-        docker push ${{ secrets.DOCKER_USERNAME }}/selftest:server-${{ github.event.inputs.version }}
+        docker push ${{ secrets.DOCKER_USERNAME }}/selftest-server:${{ github.event.inputs.version }}

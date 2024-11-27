@@ -1,0 +1,52 @@
+name: Deploy server Container
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version of the Docker container'
+        required: true
+        type: string
+
+jobs:
+  deploy-container:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the repository
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # SSH into the VPS and deploy the Docker container
+    - name: Deploy Docker container
+      env:
+        VERSION: ${{ github.event.inputs.version }}
+      run: |
+        echo "Setting up SSH connection..."
+        
+        ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.SSH_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+          set -e
+
+          IMAGE_NAME="${{ secrets.DOCKER_USERNAME }}/selftest-server"
+          CONTAINER_NAME="${IMAGE_NAME}-${VERSION}"
+
+          echo "Deploying Docker container: $CONTAINER_NAME"
+
+          # Run the new container
+          docker run -d \
+            --name "$CONTAINER_NAME" ${IMAGE_NAME}:${VERSION} \
+            --label "traefik.http.routers.fe.rule=Host(`fe.example.com`)" \
+            --label "traefik.http.services.fe.loadbalancer.server.port=3000" \
+            --label "traefik.docker.network=traefik_net"
+
+
+          echo "Stopping old containers with prefix $IMAGE_NAME (excluding $CONTAINER_NAME)..."
+          
+          # Stop all old containers with the same prefix
+          for container in $(docker ps -q --filter "name=${IMAGE_NAME}" --filter "name!=${CONTAINER_NAME}"); do
+            echo "Stopping container: $container"
+            docker stop "$container" && docker rm "$container"
+          done
+
+          echo "Deployment complete!"
+        EOF
