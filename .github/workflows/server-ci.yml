@@ -8,6 +8,12 @@ on:
         required: true
         type: string
 
+      latest:
+        description: 'Publish the image with the latest tag'
+        required: true
+        type: boolean
+        default: true
+
 jobs:
   publish-image:
     runs-on: ubuntu-latest
@@ -35,9 +41,18 @@ jobs:
     # Build the Docker image
     - name: Build Docker image
       run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/selftest-server:${{ github.event.inputs.version }} -f apps/server/Dockerfile .
+        docker build \
+          -t ${{ secrets.DOCKER_USERNAME }}/selftest-server:${{ github.event.inputs.version }} \
+          -f apps/server/Dockerfile .
 
     # Push the Docker image to Docker Hub
     - name: Push Docker image
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/selftest-server:${{ github.event.inputs.version }}
+
+    # Optionally push the Docker image with the latest tag
+    - name: Push Docker image with latest tag
+      if: ${{ github.event.inputs.latest }}
+      run: |
+        docker tag ${{ secrets.DOCKER_USERNAME }}/selftest-server:${{ github.event.inputs.version }} ${{ secrets.DOCKER_USERNAME }}/selftest-server:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/selftest-server:latest
