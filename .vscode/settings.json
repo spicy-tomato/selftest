@@ -1,5 +1,12 @@
 {
   "cSpell.words": [
-    "selftest"
+    "appleboy",
+    "certresolver",
+    "fullchain",
+    "loadbalancer",
+    "myresolver",
+    "privkey",
+    "selftest",
+    "traefik"
   ]
 }

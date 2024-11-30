@@ -1,0 +1,27 @@
+services:
+  selftest-server:
+    container_name: selftest-server
+    image: $DOCKER_USERNAME/selftest-server:$VERSION
+    labels:
+      # common
+      - "traefik.enable=true"
+      # http
+      - "traefik.http.routers.selftest-server-http.entrypoints=http"
+      - "traefik.http.routers.selftest-server-http.rule=Host(`$MY_DOMAIN`)"
+      #- "traefik.http.routers.selftest-server-http.middlewares=redirect-https@file"
+      # https
+      - "traefik.http.routers.selftest-server.entrypoints=https"
+      - "traefik.http.routers.selftest-server.tls=true"
+      - "traefik.http.routers.selftest-server.rule=Host(`$MY_DOMAIN`)"
+      - "traefik.http.routers.selftest-server.tls.certresolver=myresolver"
+      - "traefik.http.services.selftest-server.loadbalancer.server.port=$SERVER_PORT"
+    networks:
+      - traefik_net
+    volumes:
+      - "$CERT_PATH/fullchain.pem:/certs/fullchain.pem"
+      - "$CERT_PATH/privkey.pem:/certs/privkey.pem"
+
+networks:
+  traefik_net:
+    external: true
+    name: $DEFAULT_NETWORK

@@ -13,40 +13,42 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    # Checkout the repository
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    # SSH into the VPS and deploy the Docker container
-    - name: Deploy Docker container
-      env:
-        VERSION: ${{ github.event.inputs.version }}
-      run: |
-        echo "Setting up SSH connection..."
-        
-        ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.SSH_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
-          set -e
+      # Step 2: Execute bash script to generate .env file
+      - name: Generate .env file
+        run: |
+          chmod +x ./scripts/generate-env.sh
+          DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }} VERSION=${{ github.event.inputs.version }} \
+          MY_DOMAIN=${{ secrets.MY_DOMAIN }} CERT_PATH=${{ secrets.CERT_PATH }} \
+          SERVER_PORT=${{ vars.SERVER_PORT }} DEFAULT_NETWORK=${{ vars.DEFAULT_NETWORK }} \
+          ./scripts/generate-env.sh \
+          DOCKER_USERNAME VERSION MY_DOMAIN CERT_PATH SERVER_PORT DEFAULT_NETWORK
+        shell: bash
 
-          IMAGE_NAME="${{ secrets.DOCKER_USERNAME }}/selftest-server"
-          CONTAINER_NAME="${IMAGE_NAME}-${VERSION}"
+      # Step 3: Deploy files to server
+      - name: Deploy files to server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            set -e
+            # Define paths
+            SERVER_PATH="${{ secrets.SERVER_PATH }}"
+            ENV_PATH="$SERVER_PATH/.env"
+            COMPOSE_PATH="$SERVER_PATH/docker-compose.yml"
 
-          echo "Deploying Docker container: $CONTAINER_NAME"
+            # Ensure target directory exists
+            mkdir -p "$SERVER_PATH"
 
-          # Run the new container
-          docker run -d \
-            --name "$CONTAINER_NAME" ${IMAGE_NAME}:${VERSION} \
-            --label "traefik.http.routers.fe.rule=Host(`fe.example.com`)" \
-            --label "traefik.http.services.fe.loadbalancer.server.port=3000" \
-            --label "traefik.docker.network=traefik_net"
+            # Copy files
+            scp .env ${{ secrets.SSH_USER }}@${{ secrets.VPS_HOST }}:$ENV_PATH
+            scp ./apps/server/docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.VPS_HOST }}:$COMPOSE_PATH
 
-
-          echo "Stopping old containers with prefix $IMAGE_NAME (excluding $CONTAINER_NAME)..."
-          
-          # Stop all old containers with the same prefix
-          for container in $(docker ps -q --filter "name=${IMAGE_NAME}" --filter "name!=${CONTAINER_NAME}"); do
-            echo "Stopping container: $container"
-            docker stop "$container" && docker rm "$container"
-          done
-
-          echo "Deployment complete!"
-        EOF
+            # Run Docker Compose
+            docker compose -f "$COMPOSE_PATH" up -d --force-recreate
