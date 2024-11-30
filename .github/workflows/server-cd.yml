@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version of the Docker container'
+        description: 'Version of the Docker image'
         required: true
         type: string
 
@@ -27,6 +27,14 @@ jobs:
           ./scripts/generate-env.sh \
           DOCKER_USERNAME VERSION MY_DOMAIN CERT_PATH SERVER_PORT DEFAULT_NETWORK
         shell: bash
+
+      - name: Add server to known_hosts
+        run: |
+          # Create the .ssh directory if it doesn't exist
+          mkdir -p ~/.ssh
+          # Add the server's host key to the known_hosts file
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+          echo "Host key added to known_hosts"
 
       # Step 3: Deploy files to server
       - name: Deploy files to server
