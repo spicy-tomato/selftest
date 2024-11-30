@@ -13,11 +13,9 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      # Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Execute bash script to generate .env file
       - name: Generate .env file
         run: |
           chmod +x ./scripts/generate-env.sh
@@ -36,27 +34,23 @@ jobs:
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
           echo "Host key added to known_hosts"
 
-      # Step 3: Deploy files to server
+      - name: Add SSH private key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
       - name: Deploy files to server
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script: |
-            set -e
-            # Define paths
-            SERVER_PATH="${{ secrets.SERVER_PATH }}"
-            ENV_PATH="$SERVER_PATH/.env"
-            COMPOSE_PATH="$SERVER_PATH/docker-compose.yml"
+        run: |
+          # Define server path
+          SERVER_PATH="${{ secrets.SERVER_PATH }}"
 
-            # Ensure target directory exists
-            mkdir -p "$SERVER_PATH"
+          # Transfer files using rsync
+          echo "Copying .env file..."
+          rsync -e "ssh -o StrictHostKeyChecking=no" .env ${{ secrets.SSH_USER }}@${{ secrets.VPS_HOST }}:$SERVER_PATH/
 
-            # Copy files
-            scp .env ${{ secrets.SSH_USER }}@${{ secrets.VPS_HOST }}:$ENV_PATH
-            scp ./apps/server/docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.VPS_HOST }}:$COMPOSE_PATH
+          echo "Copying docker-compose.yml..."
+          rsync -e "ssh -o StrictHostKeyChecking=no" ./apps/server/docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.VPS_HOST }}:$SERVER_PATH/
 
-            # Run Docker Compose
-            docker compose -f "$COMPOSE_PATH" up -d --force-recreate
+          # Run Docker Compose on the server
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.VPS_HOST }} \
+            "docker compose -f $SERVER_PATH/docker-compose.yml up -d --force-recreate"
