@@ -1,4 +1,5 @@
 name: Server CI
+run-name: Server CI - ${{ github.event.inputs.version }}
 
 on:
   workflow_dispatch:
