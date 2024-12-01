@@ -1,5 +1,5 @@
 name: Server CD
-run-name: Server CD - ${{ github.event.inputs.version }}${{ github.event.inputs.dry-run && ' (dry-run)' || '' }}
+run-name: Server CD - ${{ github.event.inputs.version }}${{ github.event.inputs.dry-run == 'true' && ' (dry-run)' || '' }}
 
 on:
   workflow_dispatch:
@@ -7,13 +7,15 @@ on:
       version:
         description: 'Version of the Docker image'
         required: true
-        type: string
 
       dry-run:
         description: 'Dry run the workflow'
         required: true
-        type: boolean
-        default: false
+        type: choice
+        default: 'false'
+        options:
+          - true
+          - false
 
 jobs:
   deploy-container:
@@ -47,7 +49,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
 
       - name: Deploy files to server
-        if: ${{ !github.event.inputs.dry-run }}
+        if: ${{ github.event.inputs.dry-run != 'true' }}
         run: |
           # Define server path
           SERVER_PATH="${{ secrets.SERVER_PATH }}"

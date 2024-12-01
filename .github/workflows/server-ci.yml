@@ -1,5 +1,5 @@
 name: Server CI
-run-name: Server CI - ${{ github.event.inputs.version }}${{ github.event.inputs.dry-run && ' (dry-run)' || '' }}
+run-name: Server CI - ${{ github.event.inputs.version }}${{ github.event.inputs.dry-run == 'true' && ' (dry-run)' || '' }}
 
 on:
   workflow_dispatch:
@@ -7,19 +7,24 @@ on:
       version:
         description: 'Version of the new Docker image'
         required: true
-        type: string
 
       latest:
         description: 'Publish the image with the latest tag'
         required: true
-        type: boolean
-        default: true
+        type: choice
+        default: 'true'
+        options:
+          - true
+          - false
 
       dry-run:
         description: 'Dry run the workflow'
         required: true
-        type: boolean
-        default: false
+        type: choice
+        default: 'false'
+        options:
+          - true
+          - false
 
 jobs:
   publish-image:
@@ -32,7 +37,7 @@ jobs:
 
       # Create a tag and push it
       - name: Create and push tag
-        if: ${{ !github.event.inputs.dry-run }}
+        if: ${{ github.event.inputs.dry-run != 'true' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions-bot@users.noreply.github.com"
@@ -55,13 +60,13 @@ jobs:
 
       # Push the Docker image to Docker Hub
       - name: Push Docker image
-        if: ${{ !github.event.inputs.dry-run }}
+        if: ${{ github.event.inputs.dry-run != 'true' }}
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/selftest-server:${{ github.event.inputs.version }}
 
       # Optionally push the Docker image with the latest tag
       - name: Push Docker image with latest tag
-        if: ${{ github.event.inputs.latest && !github.event.inputs.dry-run }}
+        if: ${{ github.event.inputs.latest == 'true' && github.event.inputs.dry-run != 'true' }}
         run: |
           docker tag ${{ secrets.DOCKER_USERNAME }}/selftest-server:${{ github.event.inputs.version }} ${{ secrets.DOCKER_USERNAME }}/selftest-server:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/selftest-server:latest

@@ -6,11 +6,6 @@ FROM node:22.11.0-alpine3.20 AS base
 # Fix CVE-2024-9143
 RUN apk add --no-cache openssl=3.3.2-r1
 
-# Fix CVE-2024-21538
-RUN npm install -g npm@10.9.1
-
-RUN npm i -g pnpm@9.14.4
-
 RUN addgroup -g 1001 app_group && \
     adduser -u 1001 -G app_group -s /bin/sh -D app
 
@@ -27,9 +22,10 @@ ENV NODE_ENV production
 
 COPY ./apps/server/package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY ./apps/server/prisma/ ./
+
+RUN corepack enable
 RUN pnpm add -g prisma@6
 RUN pnpm --filter=server install --prod
-RUN prisma generate
 
 ########################################################
 # Build
@@ -41,6 +37,8 @@ WORKDIR /apps/server
 COPY ./apps/server/ .
 COPY tsconfig.base.json /
 COPY --from=dependencies /apps/server/node_modules ./node_modules
+
+RUN corepack enable
 RUN pnpm build
 RUN pnpm prune --prod
 
