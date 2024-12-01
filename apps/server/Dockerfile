@@ -20,12 +20,16 @@ RUN addgroup -g 1001 app_group && \
 FROM base AS dependencies
 
 WORKDIR /apps/server
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
 ENV NODE_ENV production
 
 COPY ./apps/server/package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY ./apps/server/prisma/ ./
+RUN pnpm add -g prisma@6
 RUN pnpm --filter=server install --prod
-RUN npx --yes prisma generate
+RUN prisma generate
 
 ########################################################
 # Build
