@@ -9,7 +9,10 @@ RUN apk add --no-cache openssl=3.3.2-r1
 # Fix CVE-2024-21538
 RUN npm install -g npm@10.9.1
 
-RUN npm i -g pnpm
+RUN npm i -g pnpm@9.14.4
+
+RUN addgroup -g 1001 app_group && \
+    adduser -u 1001 -G app_group -s /bin/sh -D app
 
 ########################################################
 # Install dependencies
@@ -43,6 +46,9 @@ RUN pnpm prune --prod
 FROM base AS deploy
 
 WORKDIR /apps
+
+USER app
+
 COPY --from=build /apps/server/dist/ ./dist/
 COPY --from=build /apps/server/node_modules ./node_modules
 
