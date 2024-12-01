@@ -1,5 +1,5 @@
 name: Server CI
-run-name: Server CI - ${{ github.event.inputs.version }}
+run-name: Server CI - ${{ github.event.inputs.version }}${{ github.event.inputs.dry-run && ' (dry-run)' || '' }}
 
 on:
   workflow_dispatch:
@@ -15,6 +15,12 @@ on:
         type: boolean
         default: true
 
+      dry-run:
+        description: 'Dry run the workflow'
+        required: true
+        type: boolean
+        default: false
+
 jobs:
   publish-image:
     runs-on: ubuntu-22.04
@@ -26,6 +32,7 @@ jobs:
 
       # Create a tag and push it
       - name: Create and push tag
+        if: ${{ !github.event.inputs.dry-run }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions-bot@users.noreply.github.com"
@@ -48,12 +55,13 @@ jobs:
 
       # Push the Docker image to Docker Hub
       - name: Push Docker image
+        if: ${{ !github.event.inputs.dry-run }}
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/selftest-server:${{ github.event.inputs.version }}
 
       # Optionally push the Docker image with the latest tag
       - name: Push Docker image with latest tag
-        if: ${{ github.event.inputs.latest }}
+        if: ${{ github.event.inputs.latest && !github.event.inputs.dry-run }}
         run: |
           docker tag ${{ secrets.DOCKER_USERNAME }}/selftest-server:${{ github.event.inputs.version }} ${{ secrets.DOCKER_USERNAME }}/selftest-server:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/selftest-server:latest
