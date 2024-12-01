@@ -86,3 +86,12 @@ jobs:
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: server-cd.yml
+          inputs: '{ "version": "${{ github.event.inputs.version }}", "dry-run": "false" }'
+
+      # Optionally remove the tag if any jobs fail
+      - name: Remove tag if any jobs fail
+        if: failure()
+        run: |
+          VERSION=${{ github.event.inputs.version }}
+          git tag -d "$VERSION"
+          git push origin --delete "$VERSION"
