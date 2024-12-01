@@ -26,6 +26,15 @@ on:
           - true
           - false
 
+      invoke-cd:
+        description: 'Invoke the server CD workflow'
+        required: true
+        type: choice
+        default: 'false'
+        options:
+          - true
+          - false
+
 jobs:
   publish-image:
     runs-on: ubuntu-22.04
@@ -70,3 +79,10 @@ jobs:
         run: |
           docker tag ${{ secrets.DOCKER_USERNAME }}/selftest-server:${{ github.event.inputs.version }} ${{ secrets.DOCKER_USERNAME }}/selftest-server:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/selftest-server:latest
+
+      # Optionally invoke the server CD workflow
+      - name: Invoke server CD workflow
+        if: ${{ github.event.inputs.invoke-cd == 'true' }}
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: server-cd.yml
