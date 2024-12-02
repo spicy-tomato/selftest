@@ -1,5 +1,5 @@
-name: Server CI
-run-name: Server CI - ${{ github.event.inputs.version }}${{ github.event.inputs.dry-run == 'true' && ' (dry-run)' || '' }}
+name: Web CI
+run-name: Web CI - ${{ github.event.inputs.version }}${{ github.event.inputs.dry-run == 'true' && ' (dry-run)' || '' }}
 
 on:
   workflow_dispatch:
@@ -27,7 +27,7 @@ on:
           - false
 
       invoke-cd:
-        description: 'Invoke the server CD workflow'
+        description: 'Invoke the web CD workflow'
         required: true
         type: choice
         default: 'false'
@@ -53,7 +53,7 @@ jobs:
       - name: Create and push tag
         if: ${{ github.event.inputs.dry-run != 'true' }}
         run: |
-          VERSION=server-${{ github.event.inputs.version }}
+          VERSION=web-${{ github.event.inputs.version }}
           git config user.name "github-actions[bot]"
           git config user.email "github-actions-bot@users.noreply.github.com"
           git tag $VERSION
@@ -70,34 +70,34 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
-            -t ${{ secrets.DOCKER_USERNAME }}/selftest-server:${{ github.event.inputs.version }} \
-            -f apps/server/Dockerfile .
+            -t ${{ secrets.DOCKER_USERNAME }}/selftest-web:${{ github.event.inputs.version }} \
+            -f apps/web/Dockerfile .
 
       # Push the Docker image to Docker Hub
       - name: Push Docker image
         if: ${{ github.event.inputs.dry-run != 'true' }}
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/selftest-server:${{ github.event.inputs.version }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/selftest-web:${{ github.event.inputs.version }}
 
       # Optionally push the Docker image with the latest tag
       - name: Push Docker image with latest tag
         if: ${{ github.event.inputs.latest == 'true' && github.event.inputs.dry-run != 'true' }}
         run: |
-          docker tag ${{ secrets.DOCKER_USERNAME }}/selftest-server:${{ github.event.inputs.version }} ${{ secrets.DOCKER_USERNAME }}/selftest-server:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/selftest-server:latest
+          docker tag ${{ secrets.DOCKER_USERNAME }}/selftest-web:${{ github.event.inputs.version }} ${{ secrets.DOCKER_USERNAME }}/selftest-web:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/selftest-web:latest
 
-      # Optionally invoke the server CD workflow
-      - name: Invoke server CD workflow
+      # Optionally invoke the web CD workflow
+      - name: Invoke web CD workflow
         if: ${{ github.event.inputs.invoke-cd == 'true' }}
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: server-cd.yml
+          workflow: web-cd.yml
           inputs: '{ "version": "${{ github.event.inputs.version }}", "dry-run": "false" }'
 
       # Optionally remove the tag if any jobs fail
       - name: Remove tag if any jobs fail
         if: failure()
         run: |
-          VERSION=server-${{ github.event.inputs.version }}
+          VERSION=web-${{ github.event.inputs.version }}
           git tag -d $VERSION
           git push origin --delete $VERSION

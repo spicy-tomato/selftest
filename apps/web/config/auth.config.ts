@@ -2,7 +2,7 @@ import NextAuth, { AuthOptions } from 'next-auth';
 import AzureADProvider from 'next-auth/providers/azure-ad';
 import GoogleProvider from 'next-auth/providers/google';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
-import prisma from '../../prisma/prisma'; // Adjust the import path as needed
+import prisma from '../prisma/prisma';
 
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),

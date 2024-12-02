@@ -6,6 +6,20 @@ services:
       context: .
       dockerfile: ./apps/server/Dockerfile
       target: deploy
+      args:
+        - progress=plain
+    ports:
+      - 3000:3000
+
+  web:
+    image: selftest/web:latest
+    container_name: web
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+      target: deploy
+      args:
+        - progress=plain
     ports:
       - 3000:3000
 

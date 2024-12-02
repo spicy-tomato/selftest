@@ -7,19 +7,19 @@ services:
       - "traefik.enable=true"
       # http
       - "traefik.http.routers.selftest-server-http.entrypoints=http"
-      - "traefik.http.routers.selftest-server-http.rule=Host(`$SERVER_DOMAIN`)"
-      - "traefik.http.routers.selftest-server-http.middlewares=redirect-https@file"
+      - "traefik.http.routers.selftest-server-http.rule=Host(`$WEB_DOMAIN`)"
+      #- "traefik.http.routers.selftest-server-http.middlewares=redirect-https@file"
       # https
       - "traefik.http.routers.selftest-server.entrypoints=https"
       - "traefik.http.routers.selftest-server.tls=true"
-      - "traefik.http.routers.selftest-server.rule=Host(`$SERVER_DOMAIN`)"
+      - "traefik.http.routers.selftest-server.rule=Host(`$WEB_DOMAIN`)"
       - "traefik.http.routers.selftest-server.tls.certresolver=myresolver"
       - "traefik.http.services.selftest-server.loadbalancer.server.port=$SERVER_PORT"
     networks:
       - traefik_net
     volumes:
-      - "$SERVER_CERT_PATH/fullchain.pem:/certs/fullchain.pem"
-      - "$SERVER_CERT_PATH/privkey.pem:/certs/privkey.pem"
+      - "$WEB_CERT_PATH/fullchain.pem:/certs/fullchain.pem"
+      - "$WEB_CERT_PATH/privkey.pem:/certs/privkey.pem"
 
 networks:
   traefik_net:
