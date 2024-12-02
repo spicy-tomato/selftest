@@ -10,7 +10,7 @@
   },
   "packageManager": "pnpm@9.14.4",
   "dependencies": {
-    "@chakra-ui/react": "3.2.0",
+    "@chakra-ui/react": "3.2.2",
     "@emotion/react": "11.13.5",
     "next": "15.0.3",
     "next-auth": "^4.24.10",
