@@ -1,18 +1,18 @@
 name: Server CD
-run-name: Server CD - ${{ github.event.inputs.version }}${{ github.event.inputs.dry-run == 'true' && ' (dry-run)' || '' }}
+run-name: Server CD - ${{ github.ref_type == 'tag' && github.ref_name || github.event.inputs.version || 'latest' }}${{ github.event.inputs.dry-run == 'true' && ' (dry-run)' || '' }}
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version of the Docker image'
-        required: true
+        description: "Version of the Docker image, default to tag latest"
+        required: false
 
       dry-run:
-        description: 'Dry run the workflow'
+        description: "Dry run the workflow"
         required: true
         type: choice
-        default: 'false'
+        default: "false"
         options:
           - true
           - false
@@ -22,13 +22,42 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
+      - name: Determine version
+        run: |
+          if [[ "${{ github.ref_type }}" == tag ]]; then
+            # Extract the tag name
+            VERSION=${{ github.ref_name }}
+            VERSION=${VERSION#server-}
+          else
+            # Use the version from inputs or default to "latest"
+            VERSION="${{ github.event.inputs.version || 'latest' }}"
+          fi
+          echo "Detected version: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_ENV
+
+      - name: Verify Docker tag
+        run: |
+          IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/selftest-server
+          VERSION="${{ env.version }}"
+
+          echo "Checking if Docker tag $IMAGE_NAME:$VERSION exists..."
+
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://hub.docker.com/v2/repositories/$IMAGE_NAME/tags/$VERSION/")
+
+          if [[ "$STATUS" == "200" ]]; then
+            echo "Docker tag $VERSION exists."
+          else
+            echo "Docker tag $VERSION does not exist. Exiting..."
+            exit 1
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Generate .env file
         run: |
           chmod +x ./scripts/generate-env.sh
-          DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }} VERSION=${{ github.event.inputs.version }} \
+          DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }} VERSION=${{ env.version }} \
           MY_DOMAIN=${{ secrets.MY_DOMAIN }} CERT_PATH=${{ secrets.CERT_PATH }} \
           SERVER_PORT=${{ vars.SERVER_PORT }} DEFAULT_NETWORK=${{ vars.DEFAULT_NETWORK }} \
           ./scripts/generate-env.sh \
