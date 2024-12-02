@@ -7,8 +7,10 @@
     "certresolver",
     "chakra",
     "fullchain",
+    "libc",
     "loadbalancer",
     "myresolver",
+    "nextjs",
     "privkey",
     "selftest",
     "traefik"

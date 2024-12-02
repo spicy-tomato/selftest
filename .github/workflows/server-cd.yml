@@ -22,6 +22,11 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
+      # Setup initial branch default to master
+      - name: Setup initial branch
+        run: |
+          git config --global init.defaultBranch master
+
       - name: Determine version
         run: |
           if [[ "${{ github.ref_type }}" == tag ]]; then

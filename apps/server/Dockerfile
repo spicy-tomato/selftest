@@ -31,7 +31,6 @@ RUN pnpm --filter=server install --prod
 # Build
 ########################################################
 FROM base AS build
-
 WORKDIR /apps/server
 
 COPY ./apps/server/ .

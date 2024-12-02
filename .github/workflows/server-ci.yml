@@ -40,6 +40,11 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
+      # Setup initial branch default to master
+      - name: Setup initial branch
+        run: |
+          git config --global init.defaultBranch master
+
       # Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -48,10 +53,11 @@ jobs:
       - name: Create and push tag
         if: ${{ github.event.inputs.dry-run != 'true' }}
         run: |
+          VERSION=server-${{ github.event.inputs.version }}
           git config user.name "github-actions[bot]"
           git config user.email "github-actions-bot@users.noreply.github.com"
-          git tag server-${{ github.event.inputs.version }}
-          git push origin server-${{ github.event.inputs.version }}
+          git tag $VERSION
+          git push origin $VERSION
 
       # Log in to Docker Hub
       - name: Log in to Docker Hub
@@ -92,6 +98,6 @@ jobs:
       - name: Remove tag if any jobs fail
         if: failure()
         run: |
-          VERSION=${{ github.event.inputs.version }}
-          git tag -d server-$VERSION
-          git push origin --delete server-$VERSION
+          VERSION=server-${{ github.event.inputs.version }}
+          git tag -d $VERSION
+          git push origin --delete $VERSION
