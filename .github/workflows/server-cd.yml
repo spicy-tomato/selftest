@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version of the Docker image, default to tag latest"
+        description: "Version of the Docker image (exclude prefix), default to latest"
         required: false
 
       dry-run:

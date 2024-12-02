@@ -50,8 +50,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions-bot@users.noreply.github.com"
-          git tag ${{ github.event.inputs.version }}
-          git push origin ${{ github.event.inputs.version }}
+          git tag server-${{ github.event.inputs.version }}
+          git push origin server-${{ github.event.inputs.version }}
 
       # Log in to Docker Hub
       - name: Log in to Docker Hub
@@ -93,5 +93,5 @@ jobs:
         if: failure()
         run: |
           VERSION=${{ github.event.inputs.version }}
-          git tag -d "$VERSION"
-          git push origin --delete "$VERSION"
+          git tag -d server-$VERSION
+          git push origin --delete server-$VERSION
