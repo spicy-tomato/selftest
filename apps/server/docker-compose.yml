@@ -17,11 +17,30 @@ services:
       - "traefik.http.services.selftest-server.loadbalancer.server.port=$SERVER_PORT"
     networks:
       - traefik_net
+      - selftest_net
     volumes:
       - "$SERVER_CERT_PATH/fullchain.pem:/certs/fullchain.pem"
       - "$SERVER_CERT_PATH/privkey.pem:/certs/privkey.pem"
+
+  selftest-db:
+    image: postgres:17.2-alpine3.20
+    container_name: selftest-db
+    restart: unless-stopped
+    ports:
+      - "54320:5432"
+    environment:
+      POSTGRES_PASSWORD: example
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - selftest_net
+
+volumes:
+  postgres_data:
 
 networks:
   traefik_net:
     external: true
     name: $DEFAULT_NETWORK
+  selftest_net:
+    driver: bridge

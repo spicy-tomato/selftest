@@ -95,6 +95,10 @@ jobs:
           echo "Copying docker-compose.yml..."
           rsync -e "ssh -o StrictHostKeyChecking=no" ./apps/server/docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.VPS_HOST }}:$SERVER_PATH/
 
-          # Run Docker Compose on the server
+          # Run database container on the server
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.VPS_HOST }} \
-            "docker compose -f $SERVER_PATH/docker-compose.yml up -d --force-recreate"
+            "docker compose -f $SERVER_PATH/docker-compose.yml up -d selftest-db"
+
+          # Run server container on the server
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.VPS_HOST }} \
+            "docker compose -f $SERVER_PATH/docker-compose.yml up -d --force-recreate selftest-server"
