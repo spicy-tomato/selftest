@@ -1,20 +1,20 @@
 services:
-  selftest-server:
-    container_name: selftest-server
-    image: $DOCKER_USERNAME/selftest-server:$VERSION
+  selftest-web:
+    container_name: selftest-web
+    image: $DOCKER_USERNAME/selftest-web:$VERSION
     labels:
       # common
       - "traefik.enable=true"
       # http
-      - "traefik.http.routers.selftest-server-http.entrypoints=http"
-      - "traefik.http.routers.selftest-server-http.rule=Host(`$WEB_DOMAIN`)"
-      #- "traefik.http.routers.selftest-server-http.middlewares=redirect-https@file"
+      - "traefik.http.routers.selftest-web-http.entrypoints=http"
+      - "traefik.http.routers.selftest-web-http.rule=Host(`$WEB_DOMAIN`)"
+      #- "traefik.http.routers.selftest-web-http.middlewares=redirect-https@file"
       # https
-      - "traefik.http.routers.selftest-server.entrypoints=https"
-      - "traefik.http.routers.selftest-server.tls=true"
-      - "traefik.http.routers.selftest-server.rule=Host(`$WEB_DOMAIN`)"
-      - "traefik.http.routers.selftest-server.tls.certresolver=myresolver"
-      - "traefik.http.services.selftest-server.loadbalancer.server.port=$SERVER_PORT"
+      - "traefik.http.routers.selftest-web.entrypoints=https"
+      - "traefik.http.routers.selftest-web.tls=true"
+      - "traefik.http.routers.selftest-web.rule=Host(`$WEB_DOMAIN`)"
+      - "traefik.http.routers.selftest-web.tls.certresolver=myresolver"
+      - "traefik.http.services.selftest-web.loadbalancer.server.port=$WEB_PORT"
     networks:
       - traefik_net
     volumes:
