@@ -16,13 +16,3 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-
-  - package-ecosystem: "docker"
-    ignore:
-      - dependency-name: "node"
-        versions: ["~> 22.11", "< 23"]
-    directories:
-      - "/apps/server"
-      - "/apps/web"
-    schedule:
-      interval: "daily"
