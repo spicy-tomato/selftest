@@ -16,3 +16,10 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+
+  - package-ecosystem: "docker"
+    directories:
+      - "/apps/server"
+      - "/apps/web"
+    schedule:
+      interval: "daily"
