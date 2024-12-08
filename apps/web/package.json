@@ -9,7 +9,7 @@
     "lint": "next lint --fix",
     "format": "prettier --write \"**/*.ts\" \"**/*.tsx\""
   },
-  "packageManager": "pnpm@9.14.4",
+  "packageManager": "pnpm@9.15.0",
   "dependencies": {
     "@chakra-ui/react": "3.2.2",
     "@emotion/react": "11.13.5",
