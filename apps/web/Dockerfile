@@ -3,6 +3,9 @@
 ########################################################
 FROM node:22.12.0-alpine3.20 AS base
 
+# Fix CVE-2024-21538
+RUN rm -r /usr/local/lib/node_modules/npm/node_modules/cross-spawn/
+
 # Fix CVE-2024-9143
 RUN apk add --no-cache openssl=3.3.2-r1
 
