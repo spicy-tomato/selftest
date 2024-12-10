@@ -21,7 +21,7 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
 COPY ./apps/web/package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY ./apps/web/prisma/ ./
+COPY ./apps/prisma/ ./
 
 RUN corepack enable
 RUN pnpm add -g prisma@~6.0.0
