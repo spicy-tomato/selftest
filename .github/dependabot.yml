@@ -23,6 +23,9 @@ updates:
         update-types:
           - "patch"
           - "minor"
+      eslint:
+        patterns:
+          - "eslint"
       typescript-eslint:
         patterns:
           - "@typescript-eslint/*"
