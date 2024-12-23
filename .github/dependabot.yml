@@ -23,6 +23,19 @@ updates:
         update-types:
           - "patch"
           - "minor"
+      next:
+        patterns:
+          - "next"
+          - "eslint-config-next"
+        update-types:
+          - "patch"
+          - "minor"
+      '@prisma/client':
+        patterns:
+          - "@prisma/client"
+        update-types:
+          - "patch"
+          - "minor"
       eslint:
         patterns:
           - "eslint"
