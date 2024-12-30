@@ -24,7 +24,7 @@ COPY ./apps/web/package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY ./apps/prisma/ ./
 
 RUN corepack enable
-RUN pnpm add -g prisma@~6.0.0
+RUN pnpm add -g prisma@~6.1.0
 RUN pnpm --filter=web install
 
 ########################################################
